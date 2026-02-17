@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Claim Pong — Flobotics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --dark:#0f2027;--mid:#1a3a4a;--accent:#00d4aa;--accent2:#00b4d8;
+    --red:#ff4757;--orange:#ffa502;--white:#f0f6f6;--purple:#a855f7;
+    --glass:rgba(15,32,39,0.85);--gold:#ffd700;
+    --payer-color:#ff6b7a;--provider-color:#00d4aa;
+  }
+  html,body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--dark);color:var(--white);
+    overflow:hidden;height:100%;width:100%;
+    user-select:none;-webkit-user-select:none;
+    touch-action:none;
+  }
+
+  /* ---- BG ---- */
+  .bg-grid{
+    position:fixed;inset:0;z-index:0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,212,170,0.03) 1px,transparent 1px);
+    background-size:40px 40px;pointer-events:none;
+  }
+
+  /* ---- SCREENS ---- */
+  .screen{
+    position:fixed;inset:0;z-index:10;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    transition:opacity .4s,transform .4s;padding:20px;
+  }
+  .screen.hidden{opacity:0;pointer-events:none;transform:scale(.95)}
+
+  /* ---- LOGO ---- */
+  .logo-img{height:50px;margin-bottom:20px;filter:brightness(0) invert(1)}
+
+  /* ---- START SCREEN ---- */
+  .title{
+    font-size:clamp(2rem,6vw,4rem);font-weight:900;letter-spacing:-2px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;margin-bottom:8px;
+  }
+  .subtitle{
+    font-size:clamp(.85rem,2.2vw,1.2rem);color:rgba(240,246,246,.6);
+    margin-bottom:30px;text-align:center;max-width:500px;line-height:1.5;
+  }
+  .start-btn{
+    font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:700;
+    padding:16px 44px;border:none;border-radius:60px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:var(--dark);cursor:pointer;
+    transition:transform .2s,box-shadow .2s;
+    box-shadow:0 0 30px rgba(0,212,170,.3);
+    text-transform:uppercase;letter-spacing:2px;
+  }
+  .start-btn:hover{transform:scale(1.05);box-shadow:0 0 50px rgba(0,212,170,.5)}
+  .start-btn:active{transform:scale(.97)}
+
+  .controls-info{
+    margin-top:25px;font-size:.8rem;color:rgba(240,246,246,.35);
+    text-align:center;line-height:1.7;
+  }
+  .controls-info strong{color:rgba(240,246,246,.6)}
+
+  /* ---- GAME SCREEN ---- */
+  #game-screen{justify-content:flex-start;padding:0}
+
+  /* ---- CANVAS CONTAINER ---- */
+  .canvas-wrap{
+    flex:1;width:100%;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  canvas{display:block;background:transparent}
+
+  /* ---- SCORE HUD ---- */
+  .score-hud{
+    position:absolute;top:12px;left:0;right:0;
+    display:flex;justify-content:center;align-items:center;gap:20px;
+    z-index:20;pointer-events:none;
+  }
+  .score-side{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  .score-label{
+    font-size:.55rem;text-transform:uppercase;letter-spacing:2px;
+    opacity:.5;
+  }
+  .score-dots{display:flex;gap:6px}
+  .score-dot{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid rgba(240,246,246,.2);
+    transition:all .3s;
+  }
+  .score-dot.filled.payer{background:var(--payer-color);border-color:var(--payer-color);box-shadow:0 0 8px var(--payer-color)}
+  .score-dot.filled.provider{background:var(--provider-color);border-color:var(--provider-color);box-shadow:0 0 8px var(--provider-color)}
+  .score-vs{
+    font-size:1rem;font-weight:900;color:rgba(240,246,246,.2);
+    letter-spacing:3px;
+  }
+
+  /* ---- BOOST BARS ---- */
+  .boost-bar-wrap{
+    position:absolute;z-index:20;pointer-events:none;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+  }
+  .boost-bar-wrap.left{left:12px;bottom:14px}
+  .boost-bar-wrap.right{right:12px;bottom:14px}
+  .boost-label{
+    font-size:.5rem;text-transform:uppercase;letter-spacing:1.5px;
+    opacity:.5;display:flex;align-items:center;gap:4px;
+  }
+  .boost-label img{height:12px;filter:brightness(0) invert(1);opacity:.7}
+  .boost-bar-bg{
+    width:100px;height:8px;border-radius:4px;
+    background:rgba(240,246,246,.08);overflow:hidden;
+  }
+  .boost-bar-fill{
+    height:100%;border-radius:4px;
+    transition:width .3s;
+  }
+  .boost-bar-fill.payer{background:linear-gradient(90deg,var(--payer-color),var(--orange))}
+  .boost-bar-fill.provider{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .boost-btn{
+    margin-top:4px;
+    font-family:'Inter',sans-serif;font-size:.55rem;font-weight:700;
+    padding:4px 12px;border:none;border-radius:20px;
+    cursor:pointer;pointer-events:auto;
+    text-transform:uppercase;letter-spacing:1px;
+    transition:all .2s;opacity:.4;
+  }
+  .boost-btn.ready{opacity:1;animation:boostPulse 1s infinite}
+  .boost-btn.payer{background:var(--payer-color);color:var(--dark)}
+  .boost-btn.provider{background:var(--accent);color:var(--dark)}
+  @keyframes boostPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+  /* ---- CLAIM LABEL ON BALL ---- */
+  /* drawn on canvas */
+
+  /* ---- GOAL FLASH ---- */
+  .goal-flash{
+    position:fixed;inset:0;z-index:30;
+    display:flex;align-items:center;justify-content:center;
+    pointer-events:none;animation:goalFade 1.5s forwards;
+  }
+  .goal-flash-text{
+    font-size:clamp(2rem,8vw,4rem);font-weight:900;
+    text-transform:uppercase;letter-spacing:4px;
+    animation:goalPop .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes goalFade{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}
+  @keyframes goalPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+
+  /* ---- RESULTS ---- */
+  .results-card{
+    background:var(--glass);
+    backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);
+    border:1px solid rgba(0,212,170,.2);border-radius:24px;
+    padding:35px 45px;text-align:center;
+    max-width:500px;width:92%;max-height:90vh;overflow-y:auto;
+  }
+  .results-title{
+    font-size:1.8rem;font-weight:900;margin-bottom:4px;
+  }
+  .results-title.payer-wins{color:var(--payer-color)}
+  .results-title.provider-wins{color:var(--provider-color)}
+  .results-sub{color:rgba(240,246,246,.5);font-size:.85rem;margin-bottom:20px}
+  .final-score{
+    font-size:2.5rem;font-weight:900;margin:10px 0 20px;
+    display:flex;align-items:center;justify-content:center;gap:15px;
+  }
+  .final-score .s-payer{color:var(--payer-color)}
+  .final-score .s-provider{color:var(--provider-color)}
+  .final-score .s-dash{color:rgba(240,246,246,.2);font-size:1.5rem}
+
+  .cta-line{margin-top:18px;font-size:1rem;font-weight:700;color:var(--white)}
+  .lead-form{margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .lead-form input{
+    font-family:'Inter',sans-serif;font-size:.9rem;
+    padding:12px 20px;border:2px solid rgba(0,212,170,.2);border-radius:50px;
+    background:rgba(15,32,39,.8);color:var(--white);outline:none;width:220px;
+    transition:border-color .2s;
+  }
+  .lead-form input:focus{border-color:var(--accent)}
+  .lead-form input::placeholder{color:rgba(240,246,246,.3)}
+  .lead-form button{
+    font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;
+    padding:12px 22px;border:none;border-radius:50px;
+    background:var(--accent);color:var(--dark);cursor:pointer;
+    transition:transform .2s;
+  }
+  .lead-form button:hover{transform:scale(1.05)}
+  .thank-you{color:var(--accent);font-weight:600;font-size:.85rem;margin-top:8px}
+  .results-actions{margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn-secondary{
+    font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;
+    padding:10px 24px;border:2px solid rgba(0,212,170,.3);border-radius:50px;
+    background:transparent;color:var(--accent);cursor:pointer;transition:all .2s;
+  }
+  .btn-secondary:hover{background:rgba(0,212,170,.1);border-color:var(--accent)}
+
+  /* ---- RESPONSIVE ---- */
+  @media(max-width:500px){
+    .boost-bar-bg{width:70px;height:6px}
+    .score-dot{width:11px;height:11px}
+    .results-card{padding:20px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ===== START ===== -->
+<div class="screen" id="start-screen">
+  <img src="https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp" alt="Flobotics" class="logo-img">
+  <div class="title">CLAIM PONG</div>
+  <div class="subtitle">Payer vs Provider. Denied claims bounce back and forth.<br>Invest in Flobotics to power up your paddle. First to 3 wins!</div>
+  <button class="start-btn" id="start-btn">START GAME</button>
+  <div class="controls-info">
+    <strong>Left player (Payer):</strong> W / S keys or touch left half<br>
+    <strong>Right player (Provider):</strong> ↑ / ↓ keys or touch right half<br>
+    <strong>Boost paddle:</strong> Q (Payer) / P (Provider) when bar is full
+  </div>
+</div>
+
+<!-- ===== GAME ===== -->
+<div class="screen hidden" id="game-screen">
+  <div class="canvas-wrap" id="canvas-wrap">
+    <canvas id="game-canvas"></canvas>
+
+    <div class="score-hud">
+      <div class="score-side">
+        <div class="score-label" style="color:var(--payer-color)">Payer</div>
+        <div class="score-dots" id="score-payer">
+          <div class="score-dot payer"></div>
+          <div class="score-dot payer"></div>
+          <div class="score-dot payer"></div>
+        </div>
+      </div>
+      <div class="score-vs">VS</div>
+      <div class="score-side">
+        <div class="score-label" style="color:var(--provider-color)">Provider</div>
+        <div class="score-dots" id="score-provider">
+          <div class="score-dot provider"></div>
+          <div class="score-dot provider"></div>
+          <div class="score-dot provider"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="boost-bar-wrap left">
+      <div class="boost-label"><img src="https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp" alt="F"> Automate</div>
+      <div class="boost-bar-bg"><div class="boost-bar-fill payer" id="boost-fill-payer" style="width:0%"></div></div>
+      <button class="boost-btn payer" id="boost-btn-payer">Q — Boost</button>
+    </div>
+    <div class="boost-bar-wrap right">
+      <div class="boost-label"><img src="https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp" alt="F"> Automate</div>
+      <div class="boost-bar-bg"><div class="boost-bar-fill provider" id="boost-fill-provider" style="width:0%"></div></div>
+      <button class="boost-btn provider" id="boost-btn-provider">P — Boost</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div class="screen hidden" id="results-screen">
+  <div class="results-card">
+    <img src="https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp" alt="Flobotics" class="logo-img" style="height:35px;margin-bottom:14px">
+    <div class="results-title" id="res-title">Game Over</div>
+    <div class="results-sub" id="res-sub">What a match!</div>
+    <div class="final-score">
+      <span class="s-payer" id="res-score-payer">0</span>
+      <span class="s-dash">—</span>
+      <span class="s-provider" id="res-score-provider">0</span>
+    </div>
+    <div class="cta-line">Want to automate your RCM for real?</div>
+    <div class="lead-form" id="lead-form">
+      <input type="email" id="email-input" placeholder="your@email.com">
+      <button id="email-btn">Let's Talk</button>
+    </div>
+    <div class="thank-you hidden" id="thank-you">Thanks! We'll reach out soon.</div>
+    <div class="results-actions">
+      <button class="btn-secondary" id="play-again-btn">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- CONFIG ----
+  const WIN_SCORE = 3;
+  const PADDLE_W_RATIO = 0.018;
+  const PADDLE_H_RATIO = 0.18;
+  const PADDLE_BOOST_H_RATIO = 0.32;
+  const BALL_R_RATIO = 0.018;
+  const BALL_SPEED_RATIO = 0.006;
+  const BALL_SPEED_INC = 1.06;
+  const PADDLE_SPEED_RATIO = 0.008;
+  const BOOST_MAX = 100;
+  const BOOST_PER_HIT = 25;
+  const BOOST_DURATION = 6000;
+  const LOGO_URL = 'https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp';
+  const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwJWzsSid-96yMHbi6YELukgl_znCls_cMP5GH47glOIjpWMUAkcwNTgJBRFFQvGNt9/exec';
+
+  const DENIAL_REASONS = [
+    'DENIED: Missing modifier','DENIED: Auth not on file','DENIED: Not eligible',
+    'DENIED: Invalid CPT','DENIED: Out of network','DENIED: Duplicate',
+    'DENIED: Timely filing','DENIED: COB issue','DENIED: No referral',
+  ];
+  const RESUBMIT_LABELS = [
+    'RESUBMIT: Corrected','RESUBMIT: Appeal','RESUBMIT: With docs',
+    'RESUBMIT: Auth added','RESUBMIT: Updated CPT','RESUBMIT: Recoded',
+  ];
+  const PAYERS = ['UHC','Aetna','BCBS','Cigna','Humana','Medicare','Medicaid'];
+
+  // ---- ELEMENTS ----
+  const startScreen = document.getElementById('start-screen');
+  const gameScreen = document.getElementById('game-screen');
+  const resultsScreen = document.getElementById('results-screen');
+  const canvas = document.getElementById('game-canvas');
+  const ctx = canvas.getContext('2d');
+  const canvasWrap = document.getElementById('canvas-wrap');
+  const startBtn = document.getElementById('start-btn');
+  const playAgainBtn = document.getElementById('play-again-btn');
+  const emailBtn = document.getElementById('email-btn');
+  const emailInput = document.getElementById('email-input');
+  const leadForm = document.getElementById('lead-form');
+  const thankYou = document.getElementById('thank-you');
+  const boostFillPayer = document.getElementById('boost-fill-payer');
+  const boostFillProvider = document.getElementById('boost-fill-provider');
+  const boostBtnPayer = document.getElementById('boost-btn-payer');
+  const boostBtnProvider = document.getElementById('boost-btn-provider');
+
+  // ---- STATE ----
+  let running = false;
+  let animId = null;
+  let W, H;
+  let scorePayer = 0, scoreProvider = 0;
+  let boostPayer = 0, boostProvider = 0;
+  let boostedPayer = false, boostedProvider = false;
+  let boostTimerPayer = null, boostTimerProvider = null;
+
+  // Game objects
+  let padL, padR, ball;
+  let ballLabel = '';
+  let ballPayer = '';
+  let ballDir = 1; // 1 = going right (toward provider), -1 = going left (toward payer)
+  let serving = false;
+  let serveTimer = null;
+
+  // Input
+  let keys = {};
+  let touchY = { left: null, right: null };
+
+  // Logo image
+  const logoImg = new Image();
+  logoImg.crossOrigin = 'anonymous';
+  logoImg.src = LOGO_URL;
+
+  // ---- HELPERS ----
+  function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+  function pick(a){return a[rand(0,a.length-1)]}
+  function lerp(a,b,t){return a+(b-a)*t}
+
+  function showScreen(s){
+    [startScreen,gameScreen,resultsScreen].forEach(e=>e.classList.add('hidden'));
+    s.classList.remove('hidden');
+  }
+
+  // ---- RESIZE ----
+  function resize(){
+    const rect = canvasWrap.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W; canvas.height = H;
+  }
+  window.addEventListener('resize', () => { if(running) resize(); });
+
+  // ---- INIT ROUND ----
+  function initRound(){
+    const pw = W * PADDLE_W_RATIO;
+    const phL = W * (boostedPayer ? PADDLE_BOOST_H_RATIO : PADDLE_H_RATIO);
+    const phR = W * (boostedProvider ? PADDLE_BOOST_H_RATIO : PADDLE_H_RATIO);
+    const margin = pw * 2;
+
+    padL = { x: margin, y: H/2 - phL/2, w: pw, h: phL, speed: H * PADDLE_SPEED_RATIO };
+    padR = { x: W - margin - pw, y: H/2 - phR/2, w: pw, h: phR, speed: H * PADDLE_SPEED_RATIO };
+
+    const br = W * BALL_R_RATIO;
+    const spd = W * BALL_SPEED_RATIO;
+    const angle = (Math.random() * 0.8 - 0.4); // slight angle
+    ballDir = Math.random() > 0.5 ? 1 : -1;
+
+    ball = {
+      x: W/2, y: H/2, r: br,
+      vx: spd * ballDir * Math.cos(angle),
+      vy: spd * Math.sin(angle),
+      baseSpeed: spd,
+    };
+
+    updateBallLabel();
+    serving = true;
+    clearTimeout(serveTimer);
+    serveTimer = setTimeout(() => { serving = false; }, 800);
+  }
+
+  function updateBallLabel(){
+    ballPayer = pick(PAYERS);
+    if(ball.vx > 0){
+      // Going right -> toward provider = DENIAL
+      ballLabel = pick(DENIAL_REASONS);
+    } else {
+      // Going left -> toward payer = RESUBMIT
+      ballLabel = pick(RESUBMIT_LABELS);
+    }
+  }
+
+  // ---- SCORE ----
+  function updateScoreUI(){
+    const dotsP = document.querySelectorAll('#score-payer .score-dot');
+    const dotsR = document.querySelectorAll('#score-provider .score-dot');
+    dotsP.forEach((d,i) => d.classList.toggle('filled', i < scorePayer));
+    dotsR.forEach((d,i) => d.classList.toggle('filled', i < scoreProvider));
+  }
+
+  function updateBoostUI(){
+    boostFillPayer.style.width = (boostPayer / BOOST_MAX * 100) + '%';
+    boostFillProvider.style.width = (boostProvider / BOOST_MAX * 100) + '%';
+    boostBtnPayer.classList.toggle('ready', boostPayer >= BOOST_MAX && !boostedPayer);
+    boostBtnProvider.classList.toggle('ready', boostProvider >= BOOST_MAX && !boostedProvider);
+  }
+
+  function goalScored(side){
+    if(!running) return;
+    if(side === 'payer') scorePayer++;
+    else scoreProvider++;
+    updateScoreUI();
+
+    // Flash
+    const flash = document.createElement('div');
+    flash.className = 'goal-flash';
+    const color = side === 'payer' ? 'var(--payer-color)' : 'var(--provider-color)';
+    const who = side === 'payer' ? 'PAYER SCORES!' : 'PROVIDER SCORES!';
+    flash.innerHTML = `<div class="goal-flash-text" style="color:${color}">${who}</div>`;
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 1500);
+
+    if(scorePayer >= WIN_SCORE || scoreProvider >= WIN_SCORE){
+      setTimeout(() => endGame(), 1200);
+    } else {
+      setTimeout(() => { if(running) initRound(); }, 1200);
+    }
+  }
+
+  // ---- BOOST ----
+  function activateBoost(side){
+    if(side === 'payer' && boostPayer >= BOOST_MAX && !boostedPayer){
+      boostedPayer = true;
+      boostPayer = 0;
+      padL.h = W * PADDLE_BOOST_H_RATIO;
+      padL.y = Math.min(padL.y, H - padL.h);
+      updateBoostUI();
+      clearTimeout(boostTimerPayer);
+      boostTimerPayer = setTimeout(() => {
+        boostedPayer = false;
+        padL.h = W * PADDLE_H_RATIO;
+        updateBoostUI();
+      }, BOOST_DURATION);
+    }
+    if(side === 'provider' && boostProvider >= BOOST_MAX && !boostedProvider){
+      boostedProvider = true;
+      boostProvider = 0;
+      padR.h = W * PADDLE_BOOST_H_RATIO;
+      padR.y = Math.min(padR.y, H - padR.h);
+      updateBoostUI();
+      clearTimeout(boostTimerProvider);
+      boostTimerProvider = setTimeout(() => {
+        boostedProvider = false;
+        padR.h = W * PADDLE_H_RATIO;
+        updateBoostUI();
+      }, BOOST_DURATION);
+    }
+  }
+
+  // ---- INPUT ----
+  document.addEventListener('keydown', e => { keys[e.key] = true; });
+  document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+  // Touch: left half = payer, right half = provider
+  canvas.addEventListener('touchstart', handleTouch, {passive:false});
+  canvas.addEventListener('touchmove', handleTouch, {passive:false});
+  canvas.addEventListener('touchend', handleTouchEnd, {passive:false});
+  canvas.addEventListener('touchcancel', handleTouchEnd, {passive:false});
+
+  function handleTouch(e){
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    for(let t of e.touches){
+      const x = t.clientX - rect.left;
+      const y = t.clientY - rect.top;
+      if(x < W/2) touchY.left = y;
+      else touchY.right = y;
+    }
+  }
+  function handleTouchEnd(e){
+    e.preventDefault();
+    // Check remaining touches
+    const rect = canvas.getBoundingClientRect();
+    let hasLeft = false, hasRight = false;
+    for(let t of e.touches){
+      const x = t.clientX - rect.left;
+      if(x < W/2) hasLeft = true; else hasRight = true;
+    }
+    if(!hasLeft) touchY.left = null;
+    if(!hasRight) touchY.right = null;
+  }
+
+  // Boost buttons (touch)
+  boostBtnPayer.addEventListener('click', () => activateBoost('payer'));
+  boostBtnProvider.addEventListener('click', () => activateBoost('provider'));
+
+  // ---- UPDATE ----
+  function update(){
+    if(!running || serving) return;
+
+    // Paddle movement (keys)
+    if(keys['w'] || keys['W']) padL.y -= padL.speed;
+    if(keys['s'] || keys['S']) padL.y += padL.speed;
+    if(keys['ArrowUp']) padR.y -= padR.speed;
+    if(keys['ArrowDown']) padR.y += padR.speed;
+
+    // Boost keys
+    if(keys['q'] || keys['Q']){ activateBoost('payer'); keys['q']=false; keys['Q']=false; }
+    if(keys['p'] || keys['P']){ activateBoost('provider'); keys['p']=false; keys['P']=false; }
+
+    // Touch movement
+    if(touchY.left !== null){
+      const target = touchY.left - padL.h/2;
+      padL.y = lerp(padL.y, target, 0.15);
+    }
+    if(touchY.right !== null){
+      const target = touchY.right - padR.h/2;
+      padR.y = lerp(padR.y, target, 0.15);
+    }
+
+    // Clamp paddles
+    padL.y = Math.max(0, Math.min(H - padL.h, padL.y));
+    padR.y = Math.max(0, Math.min(H - padR.h, padR.y));
+
+    // Ball movement
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // Top/bottom bounce
+    if(ball.y - ball.r <= 0){ ball.y = ball.r; ball.vy *= -1; }
+    if(ball.y + ball.r >= H){ ball.y = H - ball.r; ball.vy *= -1; }
+
+    // Left paddle collision
+    if(ball.vx < 0 &&
+       ball.x - ball.r <= padL.x + padL.w &&
+       ball.x + ball.r >= padL.x &&
+       ball.y + ball.r >= padL.y &&
+       ball.y - ball.r <= padL.y + padL.h){
+      ball.x = padL.x + padL.w + ball.r;
+      const hitPos = (ball.y - padL.y) / padL.h - 0.5; // -0.5 to 0.5
+      const angle = hitPos * Math.PI * 0.6;
+      const speed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
+      ball.vx = speed * Math.cos(angle);
+      ball.vy = speed * Math.sin(angle);
+      ballDir = 1;
+      updateBallLabel();
+      boostPayer = Math.min(BOOST_MAX, boostPayer + BOOST_PER_HIT);
+      updateBoostUI();
+    }
+
+    // Right paddle collision
+    if(ball.vx > 0 &&
+       ball.x + ball.r >= padR.x &&
+       ball.x - ball.r <= padR.x + padR.w &&
+       ball.y + ball.r >= padR.y &&
+       ball.y - ball.r <= padR.y + padR.h){
+      ball.x = padR.x - ball.r;
+      const hitPos = (ball.y - padR.y) / padR.h - 0.5;
+      const angle = Math.PI - hitPos * Math.PI * 0.6;
+      const speed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
+      ball.vx = -speed * Math.cos(Math.PI - angle);
+      ball.vy = speed * Math.sin(angle);
+      ballDir = -1;
+      updateBallLabel();
+      boostProvider = Math.min(BOOST_MAX, boostProvider + BOOST_PER_HIT);
+      updateBoostUI();
+    }
+
+    // Score
+    if(ball.x + ball.r < 0) goalScored('provider');
+    if(ball.x - ball.r > W) goalScored('payer');
+  }
+
+  // ---- DRAW ----
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // Center line
+    ctx.setLineDash([8,8]);
+    ctx.strokeStyle = 'rgba(240,246,246,0.06)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(W/2, 0);
+    ctx.lineTo(W/2, H);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Paddles
+    // Left (payer) — red tint
+    const padGlowL = boostedPayer ? 25 : 10;
+    ctx.shadowColor = 'rgba(255,107,122,0.5)';
+    ctx.shadowBlur = padGlowL;
+    ctx.fillStyle = boostedPayer ? '#ff6b7a' : 'rgba(255,107,122,0.8)';
+    ctx.beginPath();
+    ctx.roundRect(padL.x, padL.y, padL.w, padL.h, 4);
+    ctx.fill();
+
+    // Flobotics logo on boosted paddle
+    if(boostedPayer && logoImg.complete){
+      ctx.shadowBlur = 0;
+      const lw = padL.w * 3;
+      const lh = lw * 0.26;
+      ctx.globalAlpha = 0.6;
+      ctx.filter = 'brightness(0) invert(1)';
+      ctx.drawImage(logoImg, padL.x - lw/2 + padL.w/2, padL.y + padL.h + 6, lw, lh);
+      ctx.filter = 'none';
+      ctx.globalAlpha = 1;
+    }
+
+    // Right (provider) — green tint
+    const padGlowR = boostedProvider ? 25 : 10;
+    ctx.shadowColor = 'rgba(0,212,170,0.5)';
+    ctx.shadowBlur = padGlowR;
+    ctx.fillStyle = boostedProvider ? '#00d4aa' : 'rgba(0,212,170,0.8)';
+    ctx.beginPath();
+    ctx.roundRect(padR.x, padR.y, padR.w, padR.h, 4);
+    ctx.fill();
+
+    if(boostedProvider && logoImg.complete){
+      ctx.shadowBlur = 0;
+      const lw = padR.w * 3;
+      const lh = lw * 0.26;
+      ctx.globalAlpha = 0.6;
+      ctx.filter = 'brightness(0) invert(1)';
+      ctx.drawImage(logoImg, padR.x - lw/2 + padR.w/2, padR.y + padR.h + 6, lw, lh);
+      ctx.filter = 'none';
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.shadowBlur = 0;
+
+    // Ball
+    const isDenial = ball.vx > 0; // going toward provider
+    const ballColor = isDenial ? '#ff4757' : '#00d4aa';
+    const ballGlow = isDenial ? 'rgba(255,71,87,0.4)' : 'rgba(0,212,170,0.4)';
+
+    ctx.shadowColor = ballGlow;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = ballColor;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Ball label (floats above ball)
+    ctx.font = `700 ${Math.max(9, W*0.009)}px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = isDenial ? 'rgba(255,71,87,0.9)' : 'rgba(0,212,170,0.9)';
+    ctx.fillText(ballLabel, ball.x, ball.y - ball.r - 8);
+
+    // Payer name on ball
+    ctx.font = `600 ${Math.max(7, W*0.007)}px Inter, sans-serif`;
+    ctx.fillStyle = 'rgba(240,246,246,0.5)';
+    ctx.fillText(ballPayer, ball.x, ball.y - ball.r - 8 - Math.max(11, W*0.011));
+
+    // Side labels
+    ctx.font = `800 ${Math.max(10, W*0.012)}px Inter, sans-serif`;
+    ctx.globalAlpha = 0.06;
+    ctx.fillStyle = '#ff6b7a';
+    ctx.textAlign = 'center';
+    ctx.fillText('PAYER', W*0.25, H/2);
+    ctx.fillStyle = '#00d4aa';
+    ctx.fillText('PROVIDER', W*0.75, H/2);
+    ctx.globalAlpha = 1;
+  }
+
+  // ---- GAME LOOP ----
+  function loop(){
+    if(!running) return;
+    update();
+    draw();
+    animId = requestAnimationFrame(loop);
+  }
+
+  // ---- START/END ----
+  function startGame(){
+    scorePayer = 0; scoreProvider = 0;
+    boostPayer = 0; boostProvider = 0;
+    boostedPayer = false; boostedProvider = false;
+    clearTimeout(boostTimerPayer); clearTimeout(boostTimerProvider);
+    updateScoreUI();
+    updateBoostUI();
+    showScreen(gameScreen);
+    resize();
+    running = true;
+    initRound();
+    loop();
+  }
+
+  function endGame(){
+    running = false;
+    cancelAnimationFrame(animId);
+
+    const winner = scorePayer >= WIN_SCORE ? 'payer' : 'provider';
+    const title = document.getElementById('res-title');
+    title.textContent = winner === 'payer' ? 'Payer Wins!' : 'Provider Wins!';
+    title.className = 'results-title ' + (winner === 'payer' ? 'payer-wins' : 'provider-wins');
+    document.getElementById('res-sub').textContent =
+      winner === 'provider'
+        ? 'Denials fought off. Revenue secured.'
+        : 'The denials keep coming. Time to automate?';
+    document.getElementById('res-score-payer').textContent = scorePayer;
+    document.getElementById('res-score-provider').textContent = scoreProvider;
+
+    leadForm.classList.remove('hidden');
+    thankYou.classList.add('hidden');
+    emailInput.value = '';
+    showScreen(resultsScreen);
+  }
+
+  // ---- EVENTS ----
+  startBtn.addEventListener('click', startGame);
+  playAgainBtn.addEventListener('click', startGame);
+
+  // ---- GOOGLE SHEET ----
+  function submitToSheet(email){
+    if(!SHEET_WEBHOOK_URL) return;
+    fetch(SHEET_WEBHOOK_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: email,
+        game: 'Claim Pong',
+        survived: scorePayer + ' - ' + scoreProvider,
+        caught: scorePayer >= WIN_SCORE ? 'Payer' : 'Provider',
+        agentCaught: 0,
+        missed: 0,
+        revenueSaved: 0,
+        revenueLost: 0,
+        agents: ['pong']
+      })
+    }).catch(err => console.warn('Sheet error:', err));
+  }
+
+  emailBtn.addEventListener('click', () => {
+    const email = emailInput.value.trim();
+    if(email && email.includes('@')){
+      leadForm.classList.add('hidden');
+      thankYou.classList.remove('hidden');
+      submitToSheet(email);
+    } else {
+      emailInput.style.borderColor = 'var(--hc-red)';
+      setTimeout(() => emailInput.style.borderColor = '', 1000);
+    }
+  });
+  emailInput.addEventListener('keydown', e => { if(e.key==='Enter') emailBtn.click(); });
+
+})();
+</script>
+</body>
+</html>
