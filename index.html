@@ -107,9 +107,6 @@
     letter-spacing:3px;
   }
 
-  /* ---- CLAIM LABEL ON BALL ---- */
-  /* drawn on canvas */
-
   /* ---- GOAL FLASH ---- */
   .goal-flash{
     position:fixed;inset:0;z-index:30;
@@ -250,21 +247,22 @@
   // ---- CONFIG ----
   const WIN_SCORE = 3;
   const PADDLE_W_RATIO = 0.018;
-  const PADDLE_H_RATIO = 0.09;         // 2x smaller starting paddles
-  const PADDLE_MAX_H_RATIO = 0.35;     // max paddle size from collecting logos
-  const PADDLE_GROW_PER_LOGO = 0.012;  // growth per logo hit
+  const PADDLE_H_RATIO = 0.09;
+  const PADDLE_MAX_H_RATIO = 0.35;
+  const PADDLE_GROW_PER_LOGO = 0.012;
   const BALL_R_RATIO = 0.018;
   const BALL_SPEED_RATIO = 0.006;
-  const BALL_SPEED_INC = 1.06;
+  const BALL_SPEED_INC = 1.04;          // reduced from 1.06 to prevent tunneling
+  const BALL_MAX_SPEED_RATIO = 0.018;   // cap max ball speed to 3x initial
   const PADDLE_SPEED_RATIO = 0.008;
   const LOGO_URL = 'https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp';
   const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwJWzsSid-96yMHbi6YELukgl_znCls_cMP5GH47glOIjpWMUAkcwNTgJBRFFQvGNt9/exec';
 
   // Logo collectible config
-  const LOGO_SPAWN_MIN = 3000;    // min ms between spawns
-  const LOGO_SPAWN_MAX = 6000;    // max ms between spawns
-  const LOGO_LIFETIME = 5000;     // ms before logo disappears
-  const LOGO_SIZE_RATIO = 0.06;   // logo width relative to canvas width
+  const LOGO_SPAWN_MIN = 3000;
+  const LOGO_SPAWN_MAX = 6000;
+  const LOGO_LIFETIME = 5000;
+  const LOGO_SIZE_RATIO = 0.06;
   const MAX_LOGOS_ON_FIELD = 3;
 
   const DENIAL_REASONS = [
@@ -294,19 +292,20 @@
 
   // ---- STATE ----
   let running = false;
+  let paused = false;       // true between rounds (after goal, waiting for initRound)
   let animId = null;
   let W, H;
   let scorePayer = 0, scoreProvider = 0;
 
   // Paddle growth tracking (permanent per match)
-  let padLGrowth = 0;  // extra ratio added from logo hits
+  let padLGrowth = 0;
   let padRGrowth = 0;
 
   // Game objects
-  let padL, padR, ball;
+  let padL = null, padR = null, ball = null;
   let ballLabel = '';
   let ballPayer = '';
-  let ballDir = 1; // 1 = going right (toward provider), -1 = going left (toward payer)
+  let ballDir = 1;
   let serving = false;
   let serveTimer = null;
 
@@ -318,7 +317,6 @@
   // Logo collectibles on field
   let logos = [];
   let logoSpawnTimer = null;
-  let lastLogoSpawn = 0;
 
   // Collect animation particles
   let collectParticles = [];
@@ -336,6 +334,7 @@
   function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
   function pick(a){return a[rand(0,a.length-1)]}
   function lerp(a,b,t){return a+(b-a)*t}
+  function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
 
   function showScreen(s){
     [startScreen,gameScreen,resultsScreen].forEach(e=>e.classList.add('hidden'));
@@ -356,19 +355,16 @@
     if(logos.length >= MAX_LOGOS_ON_FIELD) return;
 
     const lw = W * LOGO_SIZE_RATIO;
-    const lh = lw * 0.26; // logo aspect ratio
-    const margin = W * 0.15; // keep away from paddles
+    const lh = lw * 0.26;
+    const margin = W * 0.15;
     const x = margin + Math.random() * (W - 2 * margin - lw);
     const y = H * 0.15 + Math.random() * (H * 0.7 - lh);
 
     logos.push({
-      x: x,
-      y: y,
-      w: lw,
-      h: lh,
+      x: x, y: y, w: lw, h: lh,
       born: Date.now(),
       lifetime: LOGO_LIFETIME,
-      alpha: 0, // fade in
+      alpha: 0,
       pulsePhase: Math.random() * Math.PI * 2,
     });
   }
@@ -386,24 +382,26 @@
     if(!ball) return;
     for(let i = logos.length - 1; i >= 0; i--){
       const logo = logos[i];
-      // Simple circle-rect collision
-      const closestX = Math.max(logo.x, Math.min(ball.x, logo.x + logo.w));
-      const closestY = Math.max(logo.y, Math.min(ball.y, logo.y + logo.h));
+      const closestX = clamp(ball.x, logo.x, logo.x + logo.w);
+      const closestY = clamp(ball.y, logo.y, logo.y + logo.h);
       const dx = ball.x - closestX;
       const dy = ball.y - closestY;
       if(dx * dx + dy * dy <= ball.r * ball.r){
-        // Hit! Determine which player's side the ball is coming from
         // The player who LAST hit the ball gets the growth
         const side = ballDir > 0 ? 'payer' : 'provider';
 
         if(side === 'payer'){
           padLGrowth = Math.min(PADDLE_MAX_H_RATIO - PADDLE_H_RATIO, padLGrowth + PADDLE_GROW_PER_LOGO);
-          padL.h = W * (PADDLE_H_RATIO + padLGrowth);
-          padL.y = Math.min(padL.y, H - padL.h);
+          if(padL) {
+            padL.h = W * (PADDLE_H_RATIO + padLGrowth);
+            padL.y = clamp(padL.y, 0, H - padL.h);
+          }
         } else {
           padRGrowth = Math.min(PADDLE_MAX_H_RATIO - PADDLE_H_RATIO, padRGrowth + PADDLE_GROW_PER_LOGO);
-          padR.h = W * (PADDLE_H_RATIO + padRGrowth);
-          padR.y = Math.min(padR.y, H - padR.h);
+          if(padR) {
+            padR.h = W * (PADDLE_H_RATIO + padRGrowth);
+            padR.y = clamp(padR.y, 0, H - padR.h);
+          }
         }
 
         // Spawn collect particles
@@ -430,12 +428,9 @@
     for(let i = logos.length - 1; i >= 0; i--){
       const logo = logos[i];
       const age = now - logo.born;
-      // Fade in first 300ms
       if(age < 300) logo.alpha = age / 300;
-      // Fade out last 500ms
       else if(age > logo.lifetime - 500) logo.alpha = Math.max(0, (logo.lifetime - age) / 500);
       else logo.alpha = 1;
-      // Remove expired
       if(age > logo.lifetime) logos.splice(i, 1);
     }
   }
@@ -462,7 +457,7 @@
 
     const br = W * BALL_R_RATIO;
     const spd = W * BALL_SPEED_RATIO;
-    const angle = (Math.random() * 0.8 - 0.4); // slight angle
+    const angle = (Math.random() * 0.8 - 0.4);
     ballDir = Math.random() > 0.5 ? 1 : -1;
 
     ball = {
@@ -472,6 +467,7 @@
       baseSpeed: spd,
     };
 
+    paused = false;
     updateBallLabel();
     serving = true;
     clearTimeout(serveTimer);
@@ -479,19 +475,18 @@
   }
 
   function updateBallLabel(){
+    if(!ball) return;
     ballPayer = pick(PAYERS);
     if(ball.vx > 0){
-      // Going right -> toward provider = DENIAL
       ballLabel = pick(DENIAL_REASONS);
       bannerText = 'DENIED';
       bannerColor = '#ff4757';
     } else {
-      // Going left -> toward payer = RESUBMIT
       ballLabel = pick(RESUBMIT_LABELS);
       bannerText = 'RESUBMITTED';
       bannerColor = '#00d4aa';
     }
-    bannerAlpha = 1.0; // flash bright then fade slightly
+    bannerAlpha = 1.0;
   }
 
   // ---- SCORE ----
@@ -503,7 +498,8 @@
   }
 
   function goalScored(side){
-    if(!running) return;
+    if(!running || paused) return;   // prevent double-scoring
+    paused = true;                   // stop update logic until next round
     if(side === 'payer') scorePayer++;
     else scoreProvider++;
     updateScoreUI();
@@ -517,6 +513,9 @@
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 1500);
 
+    // Hide ball during pause
+    ball = null;
+
     if(scorePayer >= WIN_SCORE || scoreProvider >= WIN_SCORE){
       setTimeout(() => endGame(), 1200);
     } else {
@@ -528,7 +527,6 @@
   document.addEventListener('keydown', e => { keys[e.key] = true; });
   document.addEventListener('keyup', e => { keys[e.key] = false; });
 
-  // Touch: left half = payer, right half = provider
   canvas.addEventListener('touchstart', handleTouch, {passive:false});
   canvas.addEventListener('touchmove', handleTouch, {passive:false});
   canvas.addEventListener('touchend', handleTouchEnd, {passive:false});
@@ -546,7 +544,6 @@
   }
   function handleTouchEnd(e){
     e.preventDefault();
-    // Check remaining touches
     const rect = canvas.getBoundingClientRect();
     let hasLeft = false, hasRight = false;
     for(let t of e.touches){
@@ -559,7 +556,8 @@
 
   // ---- UPDATE ----
   function update(){
-    if(!running || serving) return;
+    if(!running || paused || serving) return;
+    if(!ball || !padL || !padR) return;  // safety check
 
     // Paddle movement (keys)
     if(keys['w'] || keys['W']) padL.y -= padL.speed;
@@ -578,47 +576,61 @@
     }
 
     // Clamp paddles
-    padL.y = Math.max(0, Math.min(H - padL.h, padL.y));
-    padR.y = Math.max(0, Math.min(H - padR.h, padR.y));
+    padL.y = clamp(padL.y, 0, H - padL.h);
+    padR.y = clamp(padR.y, 0, H - padR.h);
 
-    // Ball movement
-    ball.x += ball.vx;
-    ball.y += ball.vy;
+    // Ball movement — sub-step to prevent tunneling
+    const maxStep = ball.r * 0.8;  // never move more than ~radius per step
+    const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+    const steps = Math.max(1, Math.ceil(speed / maxStep));
 
-    // Top/bottom bounce
-    if(ball.y - ball.r <= 0){ ball.y = ball.r; ball.vy *= -1; }
-    if(ball.y + ball.r >= H){ ball.y = H - ball.r; ball.vy *= -1; }
+    for(let step = 0; step < steps; step++){
+      ball.x += ball.vx / steps;
+      ball.y += ball.vy / steps;
 
-    // Left paddle collision
-    if(ball.vx < 0 &&
-       ball.x - ball.r <= padL.x + padL.w &&
-       ball.x + ball.r >= padL.x &&
-       ball.y + ball.r >= padL.y &&
-       ball.y - ball.r <= padL.y + padL.h){
-      ball.x = padL.x + padL.w + ball.r;
-      const hitPos = (ball.y - padL.y) / padL.h - 0.5; // -0.5 to 0.5
-      const angle = hitPos * Math.PI * 0.6;
-      const speed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
-      ball.vx = speed * Math.cos(angle);
-      ball.vy = speed * Math.sin(angle);
-      ballDir = 1;
-      updateBallLabel();
-    }
+      // Top/bottom bounce
+      if(ball.y - ball.r <= 0){ ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
+      if(ball.y + ball.r >= H){ ball.y = H - ball.r; ball.vy = -Math.abs(ball.vy); }
 
-    // Right paddle collision
-    if(ball.vx > 0 &&
-       ball.x + ball.r >= padR.x &&
-       ball.x - ball.r <= padR.x + padR.w &&
-       ball.y + ball.r >= padR.y &&
-       ball.y - ball.r <= padR.y + padR.h){
-      ball.x = padR.x - ball.r;
-      const hitPos = (ball.y - padR.y) / padR.h - 0.5;
-      const angle = Math.PI - hitPos * Math.PI * 0.6;
-      const speed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
-      ball.vx = -speed * Math.cos(Math.PI - angle);
-      ball.vy = speed * Math.sin(angle);
-      ballDir = -1;
-      updateBallLabel();
+      // Left paddle collision
+      if(ball.vx < 0 &&
+         ball.x - ball.r <= padL.x + padL.w &&
+         ball.x + ball.r >= padL.x &&
+         ball.y + ball.r >= padL.y &&
+         ball.y - ball.r <= padL.y + padL.h){
+        ball.x = padL.x + padL.w + ball.r;
+        const hitPos = clamp((ball.y - padL.y) / padL.h - 0.5, -0.5, 0.5);
+        const angle = hitPos * Math.PI * 0.6;
+        let newSpeed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
+        newSpeed = Math.min(newSpeed, W * BALL_MAX_SPEED_RATIO);  // cap speed
+        ball.vx = newSpeed * Math.cos(angle);
+        ball.vy = newSpeed * Math.sin(angle);
+        ballDir = 1;
+        updateBallLabel();
+        break;  // exit sub-stepping after collision
+      }
+
+      // Right paddle collision
+      if(ball.vx > 0 &&
+         ball.x + ball.r >= padR.x &&
+         ball.x - ball.r <= padR.x + padR.w &&
+         ball.y + ball.r >= padR.y &&
+         ball.y - ball.r <= padR.y + padR.h){
+        ball.x = padR.x - ball.r;
+        const hitPos = clamp((ball.y - padR.y) / padR.h - 0.5, -0.5, 0.5);
+        const angle = hitPos * Math.PI * 0.6;
+        let newSpeed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
+        newSpeed = Math.min(newSpeed, W * BALL_MAX_SPEED_RATIO);  // cap speed
+        ball.vx = -newSpeed * Math.cos(angle);
+        ball.vy = newSpeed * Math.sin(angle);
+        ballDir = -1;
+        updateBallLabel();
+        break;  // exit sub-stepping after collision
+      }
+
+      // Score detection (only check once per frame, in outermost sub-step)
+      if(ball.x + ball.r < 0){ goalScored('provider'); return; }
+      if(ball.x - ball.r > W){ goalScored('payer'); return; }
     }
 
     // Logo collectible collisions
@@ -628,10 +640,6 @@
 
     // Banner alpha slowly fades to a resting level
     if(bannerAlpha > 0.5) bannerAlpha -= 0.008;
-
-    // Score
-    if(ball.x + ball.r < 0) goalScored('provider');
-    if(ball.x - ball.r > W) goalScored('payer');
   }
 
   // ---- DRAW ----
@@ -670,7 +678,6 @@
         const pulse = 1 + 0.05 * Math.sin(Date.now() * 0.004 + logo.pulsePhase);
         ctx.globalAlpha = logo.alpha * 0.8;
         ctx.filter = 'brightness(0) invert(1)';
-        // Glow behind logo
         ctx.shadowColor = 'rgba(0,212,170,0.5)';
         ctx.shadowBlur = 15;
         const drawW = logo.w * pulse;
@@ -699,73 +706,76 @@
       ctx.restore();
     }
 
-    // Paddles
-    // Left (payer) — red tint
-    const padGlowL = 10 + padLGrowth * 80;
-    ctx.shadowColor = 'rgba(255,107,122,0.5)';
-    ctx.shadowBlur = padGlowL;
-    ctx.fillStyle = padLGrowth > 0.02 ? '#ff6b7a' : 'rgba(255,107,122,0.8)';
-    ctx.beginPath();
-    ctx.roundRect(padL.x, padL.y, padL.w, padL.h, 4);
-    ctx.fill();
+    // ---- PADDLES ----
+    if(padL){
+      const padGlowL = 10 + padLGrowth * 80;
+      ctx.shadowColor = 'rgba(255,107,122,0.5)';
+      ctx.shadowBlur = padGlowL;
+      ctx.fillStyle = padLGrowth > 0.02 ? '#ff6b7a' : 'rgba(255,107,122,0.8)';
+      ctx.beginPath();
+      ctx.roundRect(padL.x, padL.y, padL.w, padL.h, 4);
+      ctx.fill();
 
-    // Flobotics logo next to grown paddle
-    if(padLGrowth > 0 && logoImg.complete){
-      ctx.shadowBlur = 0;
-      const lw = padL.w * 3;
-      const lh = lw * 0.26;
-      ctx.globalAlpha = Math.min(0.7, padLGrowth * 10);
-      ctx.filter = 'brightness(0) invert(1)';
-      ctx.drawImage(logoImg, padL.x - lw/2 + padL.w/2, padL.y + padL.h + 6, lw, lh);
-      ctx.filter = 'none';
-      ctx.globalAlpha = 1;
+      if(padLGrowth > 0 && logoImg.complete){
+        ctx.shadowBlur = 0;
+        const lw = padL.w * 3;
+        const lh = lw * 0.26;
+        ctx.globalAlpha = Math.min(0.7, padLGrowth * 10);
+        ctx.filter = 'brightness(0) invert(1)';
+        ctx.drawImage(logoImg, padL.x - lw/2 + padL.w/2, padL.y + padL.h + 6, lw, lh);
+        ctx.filter = 'none';
+        ctx.globalAlpha = 1;
+      }
     }
 
-    // Right (provider) — green tint
-    const padGlowR = 10 + padRGrowth * 80;
-    ctx.shadowColor = 'rgba(0,212,170,0.5)';
-    ctx.shadowBlur = padGlowR;
-    ctx.fillStyle = padRGrowth > 0.02 ? '#00d4aa' : 'rgba(0,212,170,0.8)';
-    ctx.beginPath();
-    ctx.roundRect(padR.x, padR.y, padR.w, padR.h, 4);
-    ctx.fill();
+    if(padR){
+      const padGlowR = 10 + padRGrowth * 80;
+      ctx.shadowColor = 'rgba(0,212,170,0.5)';
+      ctx.shadowBlur = padGlowR;
+      ctx.fillStyle = padRGrowth > 0.02 ? '#00d4aa' : 'rgba(0,212,170,0.8)';
+      ctx.beginPath();
+      ctx.roundRect(padR.x, padR.y, padR.w, padR.h, 4);
+      ctx.fill();
 
-    if(padRGrowth > 0 && logoImg.complete){
-      ctx.shadowBlur = 0;
-      const lw = padR.w * 3;
-      const lh = lw * 0.26;
-      ctx.globalAlpha = Math.min(0.7, padRGrowth * 10);
-      ctx.filter = 'brightness(0) invert(1)';
-      ctx.drawImage(logoImg, padR.x - lw/2 + padR.w/2, padR.y + padR.h + 6, lw, lh);
-      ctx.filter = 'none';
-      ctx.globalAlpha = 1;
+      if(padRGrowth > 0 && logoImg.complete){
+        ctx.shadowBlur = 0;
+        const lw = padR.w * 3;
+        const lh = lw * 0.26;
+        ctx.globalAlpha = Math.min(0.7, padRGrowth * 10);
+        ctx.filter = 'brightness(0) invert(1)';
+        ctx.drawImage(logoImg, padR.x - lw/2 + padR.w/2, padR.y + padR.h + 6, lw, lh);
+        ctx.filter = 'none';
+        ctx.globalAlpha = 1;
+      }
     }
 
     ctx.shadowBlur = 0;
 
-    // Ball
-    const isDenial = ball.vx > 0; // going toward provider
-    const ballColor = isDenial ? '#ff4757' : '#00d4aa';
-    const ballGlow = isDenial ? 'rgba(255,71,87,0.4)' : 'rgba(0,212,170,0.4)';
+    // ---- BALL ----
+    if(ball){
+      const isDenial = ball.vx > 0;
+      const ballColor = isDenial ? '#ff4757' : '#00d4aa';
+      const ballGlow = isDenial ? 'rgba(255,71,87,0.4)' : 'rgba(0,212,170,0.4)';
 
-    ctx.shadowColor = ballGlow;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = ballColor;
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
+      ctx.shadowColor = ballGlow;
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = ballColor;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
 
-    // Ball label (floats above ball)
-    ctx.font = `700 ${Math.max(9, W*0.009)}px Inter, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = isDenial ? 'rgba(255,71,87,0.9)' : 'rgba(0,212,170,0.9)';
-    ctx.fillText(ballLabel, ball.x, ball.y - ball.r - 8);
+      // Ball label
+      ctx.font = `700 ${Math.max(9, W*0.009)}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = isDenial ? 'rgba(255,71,87,0.9)' : 'rgba(0,212,170,0.9)';
+      ctx.fillText(ballLabel, ball.x, ball.y - ball.r - 8);
 
-    // Payer name on ball
-    ctx.font = `600 ${Math.max(7, W*0.007)}px Inter, sans-serif`;
-    ctx.fillStyle = 'rgba(240,246,246,0.5)';
-    ctx.fillText(ballPayer, ball.x, ball.y - ball.r - 8 - Math.max(11, W*0.011));
+      // Payer name
+      ctx.font = `600 ${Math.max(7, W*0.007)}px Inter, sans-serif`;
+      ctx.fillStyle = 'rgba(240,246,246,0.5)';
+      ctx.fillText(ballPayer, ball.x, ball.y - ball.r - 8 - Math.max(11, W*0.011));
+    }
 
     // Side labels
     ctx.font = `800 ${Math.max(10, W*0.012)}px Inter, sans-serif`;
@@ -792,23 +802,27 @@
     padLGrowth = 0; padRGrowth = 0;
     logos = [];
     collectParticles = [];
+    paused = false;
     clearTimeout(logoSpawnTimer);
+    clearTimeout(serveTimer);
     updateScoreUI();
     showScreen(gameScreen);
     resize();
     running = true;
     initRound();
-    // Start spawning logos after a short delay
     setTimeout(() => { spawnLogo(); scheduleLogoSpawn(); }, 2000);
     loop();
   }
 
   function endGame(){
     running = false;
+    paused = true;
     cancelAnimationFrame(animId);
     clearTimeout(logoSpawnTimer);
+    clearTimeout(serveTimer);
     logos = [];
     collectParticles = [];
+    ball = null;
 
     const winner = scorePayer >= WIN_SCORE ? 'payer' : 'provider';
     const title = document.getElementById('res-title');
