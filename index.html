@@ -20,8 +20,6 @@
     user-select:none;-webkit-user-select:none;
     touch-action:none;
   }
-
-  /* ---- BG ---- */
   .bg-grid{
     position:fixed;inset:0;z-index:0;
     background-image:
@@ -29,8 +27,6 @@
       linear-gradient(90deg,rgba(0,212,170,0.03) 1px,transparent 1px);
     background-size:40px 40px;pointer-events:none;
   }
-
-  /* ---- SCREENS ---- */
   .screen{
     position:fixed;inset:0;z-index:10;
     display:flex;flex-direction:column;
@@ -38,11 +34,7 @@
     transition:opacity .4s,transform .4s;padding:20px;
   }
   .screen.hidden{opacity:0;pointer-events:none;transform:scale(.95)}
-
-  /* ---- LOGO ---- */
   .logo-img{height:50px;margin-bottom:20px;filter:brightness(0) invert(1)}
-
-  /* ---- START SCREEN ---- */
   .title{
     font-size:clamp(2rem,6vw,4rem);font-weight:900;letter-spacing:-2px;
     background:linear-gradient(135deg,var(--accent),var(--accent2));
@@ -64,50 +56,32 @@
   }
   .start-btn:hover{transform:scale(1.05);box-shadow:0 0 50px rgba(0,212,170,.5)}
   .start-btn:active{transform:scale(.97)}
-
   .controls-info{
     margin-top:25px;font-size:.8rem;color:rgba(240,246,246,.35);
     text-align:center;line-height:1.7;
   }
   .controls-info strong{color:rgba(240,246,246,.6)}
-
-  /* ---- GAME SCREEN ---- */
   #game-screen{justify-content:flex-start;padding:0}
-
-  /* ---- CANVAS CONTAINER ---- */
   .canvas-wrap{
     flex:1;width:100%;position:relative;overflow:hidden;
     display:flex;align-items:center;justify-content:center;
   }
   canvas{display:block;background:transparent}
-
-  /* ---- SCORE HUD ---- */
   .score-hud{
     position:absolute;top:12px;left:0;right:0;
     display:flex;justify-content:center;align-items:center;gap:20px;
     z-index:20;pointer-events:none;
   }
-  .score-side{
-    display:flex;flex-direction:column;align-items:center;gap:2px;
-  }
-  .score-label{
-    font-size:.55rem;text-transform:uppercase;letter-spacing:2px;
-    opacity:.5;
-  }
+  .score-side{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .score-label{font-size:.55rem;text-transform:uppercase;letter-spacing:2px;opacity:.5}
   .score-dots{display:flex;gap:6px}
   .score-dot{
     width:14px;height:14px;border-radius:50%;
-    border:2px solid rgba(240,246,246,.2);
-    transition:all .3s;
+    border:2px solid rgba(240,246,246,.2);transition:all .3s;
   }
   .score-dot.filled.payer{background:var(--payer-color);border-color:var(--payer-color);box-shadow:0 0 8px var(--payer-color)}
   .score-dot.filled.provider{background:var(--provider-color);border-color:var(--provider-color);box-shadow:0 0 8px var(--provider-color)}
-  .score-vs{
-    font-size:1rem;font-weight:900;color:rgba(240,246,246,.2);
-    letter-spacing:3px;
-  }
-
-  /* ---- GOAL FLASH ---- */
+  .score-vs{font-size:1rem;font-weight:900;color:rgba(240,246,246,.2);letter-spacing:3px}
   .goal-flash{
     position:fixed;inset:0;z-index:30;
     display:flex;align-items:center;justify-content:center;
@@ -120,8 +94,6 @@
   }
   @keyframes goalFade{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}
   @keyframes goalPop{0%{transform:scale(0)}100%{transform:scale(1)}}
-
-  /* ---- RESULTS ---- */
   .results-card{
     background:var(--glass);
     backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);
@@ -129,9 +101,7 @@
     padding:35px 45px;text-align:center;
     max-width:500px;width:92%;max-height:90vh;overflow-y:auto;
   }
-  .results-title{
-    font-size:1.8rem;font-weight:900;margin-bottom:4px;
-  }
+  .results-title{font-size:1.8rem;font-weight:900;margin-bottom:4px}
   .results-title.payer-wins{color:var(--payer-color)}
   .results-title.provider-wins{color:var(--provider-color)}
   .results-sub{color:rgba(240,246,246,.5);font-size:.85rem;margin-bottom:20px}
@@ -142,7 +112,6 @@
   .final-score .s-payer{color:var(--payer-color)}
   .final-score .s-provider{color:var(--provider-color)}
   .final-score .s-dash{color:rgba(240,246,246,.2);font-size:1.5rem}
-
   .cta-line{margin-top:18px;font-size:1rem;font-weight:700;color:var(--white)}
   .lead-form{margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
   .lead-form input{
@@ -156,8 +125,7 @@
   .lead-form button{
     font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;
     padding:12px 22px;border:none;border-radius:50px;
-    background:var(--accent);color:var(--dark);cursor:pointer;
-    transition:transform .2s;
+    background:var(--accent);color:var(--dark);cursor:pointer;transition:transform .2s;
   }
   .lead-form button:hover{transform:scale(1.05)}
   .thank-you{color:var(--accent);font-weight:600;font-size:.85rem;margin-top:8px}
@@ -168,8 +136,6 @@
     background:transparent;color:var(--accent);cursor:pointer;transition:all .2s;
   }
   .btn-secondary:hover{background:rgba(0,212,170,.1);border-color:var(--accent)}
-
-  /* ---- RESPONSIVE ---- */
   @media(max-width:500px){
     .score-dot{width:11px;height:11px}
     .results-card{padding:20px 16px}
@@ -179,7 +145,6 @@
 <body>
 <div class="bg-grid"></div>
 
-<!-- ===== START ===== -->
 <div class="screen" id="start-screen">
   <img src="https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp" alt="Flobotics" class="logo-img">
   <div class="title">CLAIM PONG</div>
@@ -192,11 +157,9 @@
   </div>
 </div>
 
-<!-- ===== GAME ===== -->
 <div class="screen hidden" id="game-screen">
   <div class="canvas-wrap" id="canvas-wrap">
     <canvas id="game-canvas"></canvas>
-
     <div class="score-hud">
       <div class="score-side">
         <div class="score-label" style="color:var(--payer-color)">Payer</div>
@@ -219,7 +182,6 @@
   </div>
 </div>
 
-<!-- ===== RESULTS ===== -->
 <div class="screen hidden" id="results-screen">
   <div class="results-card">
     <img src="https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp" alt="Flobotics" class="logo-img" style="height:35px;margin-bottom:14px">
@@ -246,24 +208,26 @@
 (function(){
   // ---- CONFIG ----
   const WIN_SCORE = 3;
-  const PADDLE_W_RATIO = 0.018;
-  const PADDLE_H_RATIO = 0.09;
+  const PADDLE_W_RATIO = 0.022;          // slightly wider paddle for reliability
+  const PADDLE_H_RATIO = 0.09;           // starting paddle height
   const PADDLE_MAX_H_RATIO = 0.35;
   const PADDLE_GROW_PER_LOGO = 0.012;
-  const BALL_R_RATIO = 0.018;
-  const BALL_SPEED_RATIO = 0.006;
-  const BALL_SPEED_INC = 1.04;          // reduced from 1.06 to prevent tunneling
-  const BALL_MAX_SPEED_RATIO = 0.018;   // cap max ball speed to 3x initial
-  const PADDLE_SPEED_RATIO = 0.008;
+  const BALL_R_RATIO = 0.015;            // slightly smaller ball for cleaner collisions
+  const BALL_SPEED_RATIO = 0.005;        // slightly slower start
+  const BALL_SPEED_INC = 1.03;
+  const BALL_MAX_SPEED_MULT = 2.5;       // max 2.5x initial speed
+  const PADDLE_SPEED_RATIO = 0.009;
   const LOGO_URL = 'https://flobogra.wavein.studio/wp-content/uploads/2026/02/logo_flobotics-768x201-1.webp';
   const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwJWzsSid-96yMHbi6YELukgl_znCls_cMP5GH47glOIjpWMUAkcwNTgJBRFFQvGNt9/exec';
 
-  // Logo collectible config
   const LOGO_SPAWN_MIN = 3000;
   const LOGO_SPAWN_MAX = 6000;
   const LOGO_LIFETIME = 5000;
   const LOGO_SIZE_RATIO = 0.06;
   const MAX_LOGOS_ON_FIELD = 3;
+
+  // Max reflection angle in radians (~65 degrees)
+  const MAX_BOUNCE_ANGLE = Math.PI * 0.36;
 
   const DENIAL_REASONS = [
     'DENIED: Missing modifier','DENIED: Auth not on file','DENIED: Not eligible',
@@ -292,33 +256,26 @@
 
   // ---- STATE ----
   let running = false;
-  let paused = false;       // true between rounds (after goal, waiting for initRound)
+  let roundActive = false;   // true only when ball is in play
   let animId = null;
   let W, H;
   let scorePayer = 0, scoreProvider = 0;
+  let padLGrowth = 0, padRGrowth = 0;
 
-  // Paddle growth tracking (permanent per match)
-  let padLGrowth = 0;
-  let padRGrowth = 0;
-
-  // Game objects
-  let padL = null, padR = null, ball = null;
+  // Game objects (always valid during roundActive)
+  let padL, padR, ball;
   let ballLabel = '';
   let ballPayer = '';
   let ballDir = 1;
-  let serving = false;
-  let serveTimer = null;
 
-  // Big banner state
+  // Big banner
   let bannerText = 'DENIED';
   let bannerColor = '#ff4757';
   let bannerAlpha = 0.7;
 
-  // Logo collectibles on field
+  // Logos & particles
   let logos = [];
   let logoSpawnTimer = null;
-
-  // Collect animation particles
   let collectParticles = [];
 
   // Input
@@ -334,7 +291,7 @@
   function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
   function pick(a){return a[rand(0,a.length-1)]}
   function lerp(a,b,t){return a+(b-a)*t}
-  function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
+  function clamp(v,lo,hi){return v<lo?lo:v>hi?hi:v}
 
   function showScreen(s){
     [startScreen,gameScreen,resultsScreen].forEach(e=>e.classList.add('hidden'));
@@ -351,131 +308,195 @@
 
   // ---- LOGO COLLECTIBLES ----
   function spawnLogo(){
-    if(!running) return;
-    if(logos.length >= MAX_LOGOS_ON_FIELD) return;
-
+    if(!running || logos.length >= MAX_LOGOS_ON_FIELD) return;
     const lw = W * LOGO_SIZE_RATIO;
     const lh = lw * 0.26;
-    const margin = W * 0.15;
-    const x = margin + Math.random() * (W - 2 * margin - lw);
-    const y = H * 0.15 + Math.random() * (H * 0.7 - lh);
-
+    const margin = W * 0.18;
     logos.push({
-      x: x, y: y, w: lw, h: lh,
-      born: Date.now(),
-      lifetime: LOGO_LIFETIME,
-      alpha: 0,
-      pulsePhase: Math.random() * Math.PI * 2,
+      x: margin + Math.random() * (W - 2*margin - lw),
+      y: H*0.15 + Math.random() * (H*0.7 - lh),
+      w: lw, h: lh,
+      born: Date.now(), lifetime: LOGO_LIFETIME,
+      alpha: 0, pulsePhase: Math.random() * Math.PI * 2,
     });
   }
 
   function scheduleLogoSpawn(){
     if(!running) return;
-    const delay = LOGO_SPAWN_MIN + Math.random() * (LOGO_SPAWN_MAX - LOGO_SPAWN_MIN);
     logoSpawnTimer = setTimeout(() => {
       spawnLogo();
       scheduleLogoSpawn();
-    }, delay);
+    }, LOGO_SPAWN_MIN + Math.random() * (LOGO_SPAWN_MAX - LOGO_SPAWN_MIN));
   }
 
   function checkLogoCollisions(){
-    if(!ball) return;
     for(let i = logos.length - 1; i >= 0; i--){
-      const logo = logos[i];
-      const closestX = clamp(ball.x, logo.x, logo.x + logo.w);
-      const closestY = clamp(ball.y, logo.y, logo.y + logo.h);
-      const dx = ball.x - closestX;
-      const dy = ball.y - closestY;
-      if(dx * dx + dy * dy <= ball.r * ball.r){
-        // The player who LAST hit the ball gets the growth
-        const side = ballDir > 0 ? 'payer' : 'provider';
+      const L = logos[i];
+      const cx = clamp(ball.x, L.x, L.x + L.w);
+      const cy = clamp(ball.y, L.y, L.y + L.h);
+      const dx = ball.x - cx, dy = ball.y - cy;
+      if(dx*dx + dy*dy > ball.r*ball.r) continue;
 
-        if(side === 'payer'){
-          padLGrowth = Math.min(PADDLE_MAX_H_RATIO - PADDLE_H_RATIO, padLGrowth + PADDLE_GROW_PER_LOGO);
-          if(padL) {
-            padL.h = W * (PADDLE_H_RATIO + padLGrowth);
-            padL.y = clamp(padL.y, 0, H - padL.h);
-          }
-        } else {
-          padRGrowth = Math.min(PADDLE_MAX_H_RATIO - PADDLE_H_RATIO, padRGrowth + PADDLE_GROW_PER_LOGO);
-          if(padR) {
-            padR.h = W * (PADDLE_H_RATIO + padRGrowth);
-            padR.y = clamp(padR.y, 0, H - padR.h);
-          }
-        }
-
-        // Spawn collect particles
-        const cx = logo.x + logo.w / 2;
-        const cy = logo.y + logo.h / 2;
-        for(let p = 0; p < 8; p++){
-          const angle = (Math.PI * 2 / 8) * p + Math.random() * 0.5;
-          collectParticles.push({
-            x: cx, y: cy,
-            vx: Math.cos(angle) * (2 + Math.random() * 3),
-            vy: Math.sin(angle) * (2 + Math.random() * 3),
-            life: 1,
-            color: side === 'payer' ? '#ff6b7a' : '#00d4aa',
-          });
-        }
-
-        logos.splice(i, 1);
+      // Who gets the growth? Last player to hit the ball.
+      const side = ballDir > 0 ? 'payer' : 'provider';
+      if(side === 'payer'){
+        padLGrowth = Math.min(PADDLE_MAX_H_RATIO - PADDLE_H_RATIO, padLGrowth + PADDLE_GROW_PER_LOGO);
+        padL.h = W * (PADDLE_H_RATIO + padLGrowth);
+        padL.y = clamp(padL.y, 0, H - padL.h);
+      } else {
+        padRGrowth = Math.min(PADDLE_MAX_H_RATIO - PADDLE_H_RATIO, padRGrowth + PADDLE_GROW_PER_LOGO);
+        padR.h = W * (PADDLE_H_RATIO + padRGrowth);
+        padR.y = clamp(padR.y, 0, H - padR.h);
       }
+
+      // Particles
+      const pcx = L.x + L.w/2, pcy = L.y + L.h/2;
+      for(let p = 0; p < 8; p++){
+        const a = (Math.PI*2/8)*p + Math.random()*0.5;
+        collectParticles.push({
+          x:pcx, y:pcy,
+          vx:Math.cos(a)*(2+Math.random()*3),
+          vy:Math.sin(a)*(2+Math.random()*3),
+          life:1, color: side==='payer'?'#ff6b7a':'#00d4aa',
+        });
+      }
+      logos.splice(i, 1);
     }
   }
 
   function updateLogos(){
     const now = Date.now();
     for(let i = logos.length - 1; i >= 0; i--){
-      const logo = logos[i];
-      const age = now - logo.born;
-      if(age < 300) logo.alpha = age / 300;
-      else if(age > logo.lifetime - 500) logo.alpha = Math.max(0, (logo.lifetime - age) / 500);
-      else logo.alpha = 1;
-      if(age > logo.lifetime) logos.splice(i, 1);
+      const L = logos[i];
+      const age = now - L.born;
+      if(age < 300) L.alpha = age/300;
+      else if(age > L.lifetime - 500) L.alpha = Math.max(0, (L.lifetime - age)/500);
+      else L.alpha = 1;
+      if(age > L.lifetime) logos.splice(i, 1);
     }
   }
 
   function updateParticles(){
     for(let i = collectParticles.length - 1; i >= 0; i--){
       const p = collectParticles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life -= 0.025;
+      p.x += p.vx; p.y += p.vy; p.life -= 0.025;
       if(p.life <= 0) collectParticles.splice(i, 1);
     }
   }
 
-  // ---- INIT ROUND ----
+  // ==================================================================
+  // PADDLE COLLISION — robust, simple, correct
+  // ==================================================================
+  // Returns bounce angle or null if no hit.
+  // The paddle front face is a vertical line segment.
+  // We only check the FRONT face of each paddle (no side/back hits).
+  //
+  // Left paddle front face: x = padL.x + padL.w, from padL.y to padL.y+padL.h
+  // Right paddle front face: x = padR.x, from padR.y to padR.y+padR.h
+
+  function collidePaddleLeft(){
+    // Ball must be moving left
+    if(ball.vx >= 0) return false;
+
+    const faceX = padL.x + padL.w; // right edge of left paddle = its front face
+
+    // Has ball center crossed the face or is within radius of it?
+    if(ball.x - ball.r > faceX) return false;  // ball hasn't reached paddle yet
+    // Don't detect if ball center is way behind paddle (already passed)
+    if(ball.x + ball.r < padL.x) return false;
+
+    // Vertical check — is ball overlapping paddle vertically?
+    if(ball.y + ball.r < padL.y || ball.y - ball.r > padL.y + padL.h) return false;
+
+    // HIT! Compute response.
+    // Place ball cleanly in front of paddle
+    ball.x = faceX + ball.r + 1;
+
+    // Bounce angle based on where ball hit the paddle
+    const hitPos = clamp((ball.y - padL.y) / padL.h, 0, 1); // 0=top, 1=bottom
+    const angle = (hitPos - 0.5) * 2 * MAX_BOUNCE_ANGLE; // maps to [-MAX, +MAX]
+
+    let spd = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
+    const maxSpd = W * BALL_SPEED_RATIO * BALL_MAX_SPEED_MULT;
+    spd = Math.min(spd, maxSpd);
+
+    // Ensure minimum horizontal speed (prevent near-vertical shots)
+    const minVxRatio = 0.3;
+    const rawVx = spd * Math.cos(angle);
+    const rawVy = spd * Math.sin(angle);
+    const absVx = Math.max(Math.abs(rawVx), spd * minVxRatio);
+
+    ball.vx = absVx;   // always positive (going right)
+    ball.vy = rawVy;
+
+    ballDir = 1;
+    updateBallLabel();
+    return true;
+  }
+
+  function collidePaddleRight(){
+    if(ball.vx <= 0) return false;
+
+    const faceX = padR.x; // left edge of right paddle = its front face
+
+    if(ball.x + ball.r < faceX) return false;
+    if(ball.x - ball.r > padR.x + padR.w) return false;
+
+    if(ball.y + ball.r < padR.y || ball.y - ball.r > padR.y + padR.h) return false;
+
+    ball.x = faceX - ball.r - 1;
+
+    const hitPos = clamp((ball.y - padR.y) / padR.h, 0, 1);
+    const angle = (hitPos - 0.5) * 2 * MAX_BOUNCE_ANGLE;
+
+    let spd = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
+    const maxSpd = W * BALL_SPEED_RATIO * BALL_MAX_SPEED_MULT;
+    spd = Math.min(spd, maxSpd);
+
+    const minVxRatio = 0.3;
+    const rawVx = spd * Math.cos(angle);
+    const rawVy = spd * Math.sin(angle);
+    const absVx = Math.max(Math.abs(rawVx), spd * minVxRatio);
+
+    ball.vx = -absVx;  // always negative (going left)
+    ball.vy = rawVy;
+
+    ballDir = -1;
+    updateBallLabel();
+    return true;
+  }
+
+  // ==================================================================
+  // INIT ROUND
+  // ==================================================================
   function initRound(){
     const pw = W * PADDLE_W_RATIO;
     const phL = W * (PADDLE_H_RATIO + padLGrowth);
     const phR = W * (PADDLE_H_RATIO + padRGrowth);
-    const margin = pw * 2;
+    const margin = pw * 2.5;
 
     padL = { x: margin, y: H/2 - phL/2, w: pw, h: phL, speed: H * PADDLE_SPEED_RATIO };
     padR = { x: W - margin - pw, y: H/2 - phR/2, w: pw, h: phR, speed: H * PADDLE_SPEED_RATIO };
 
     const br = W * BALL_R_RATIO;
     const spd = W * BALL_SPEED_RATIO;
-    const angle = (Math.random() * 0.8 - 0.4);
     ballDir = Math.random() > 0.5 ? 1 : -1;
 
+    // Start with a mild random angle (not too steep)
+    const startAngle = (Math.random() * 0.6 - 0.3);
     ball = {
       x: W/2, y: H/2, r: br,
-      vx: spd * ballDir * Math.cos(angle),
-      vy: spd * Math.sin(angle),
-      baseSpeed: spd,
+      vx: spd * ballDir * Math.cos(startAngle),
+      vy: spd * Math.sin(startAngle),
     };
 
-    paused = false;
     updateBallLabel();
-    serving = true;
-    clearTimeout(serveTimer);
-    serveTimer = setTimeout(() => { serving = false; }, 800);
+    roundActive = false;
+    // Brief serve delay
+    setTimeout(() => { roundActive = true; }, 700);
   }
 
   function updateBallLabel(){
-    if(!ball) return;
     ballPayer = pick(PAYERS);
     if(ball.vx > 0){
       ballLabel = pick(DENIAL_REASONS);
@@ -491,20 +512,18 @@
 
   // ---- SCORE ----
   function updateScoreUI(){
-    const dotsP = document.querySelectorAll('#score-payer .score-dot');
-    const dotsR = document.querySelectorAll('#score-provider .score-dot');
-    dotsP.forEach((d,i) => d.classList.toggle('filled', i < scorePayer));
-    dotsR.forEach((d,i) => d.classList.toggle('filled', i < scoreProvider));
+    document.querySelectorAll('#score-payer .score-dot').forEach((d,i) => d.classList.toggle('filled', i < scorePayer));
+    document.querySelectorAll('#score-provider .score-dot').forEach((d,i) => d.classList.toggle('filled', i < scoreProvider));
   }
 
   function goalScored(side){
-    if(!running || paused) return;   // prevent double-scoring
-    paused = true;                   // stop update logic until next round
+    if(!running || !roundActive) return;
+    roundActive = false;
+
     if(side === 'payer') scorePayer++;
     else scoreProvider++;
     updateScoreUI();
 
-    // Flash
     const flash = document.createElement('div');
     flash.className = 'goal-flash';
     const color = side === 'payer' ? 'var(--payer-color)' : 'var(--provider-color)';
@@ -513,8 +532,9 @@
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 1500);
 
-    // Hide ball during pause
-    ball = null;
+    // Park ball off-screen
+    ball.vx = 0; ball.vy = 0;
+    ball.x = -999; ball.y = -999;
 
     if(scorePayer >= WIN_SCORE || scoreProvider >= WIN_SCORE){
       setTimeout(() => endGame(), 1200);
@@ -535,110 +555,69 @@
   function handleTouch(e){
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    for(let t of e.touches){
+    for(const t of e.touches){
       const x = t.clientX - rect.left;
       const y = t.clientY - rect.top;
-      if(x < W/2) touchY.left = y;
-      else touchY.right = y;
+      if(x < W/2) touchY.left = y; else touchY.right = y;
     }
   }
   function handleTouchEnd(e){
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    let hasLeft = false, hasRight = false;
-    for(let t of e.touches){
-      const x = t.clientX - rect.left;
-      if(x < W/2) hasLeft = true; else hasRight = true;
+    let hasL = false, hasR = false;
+    for(const t of e.touches){
+      if(t.clientX - rect.left < W/2) hasL = true; else hasR = true;
     }
-    if(!hasLeft) touchY.left = null;
-    if(!hasRight) touchY.right = null;
+    if(!hasL) touchY.left = null;
+    if(!hasR) touchY.right = null;
   }
 
   // ---- UPDATE ----
   function update(){
-    if(!running || paused || serving) return;
-    if(!ball || !padL || !padR) return;  // safety check
+    if(!running) return;
 
-    // Paddle movement (keys)
-    if(keys['w'] || keys['W']) padL.y -= padL.speed;
-    if(keys['s'] || keys['S']) padL.y += padL.speed;
+    // Always allow paddle movement (even during serve pause)
+    if(keys['w']||keys['W']) padL.y -= padL.speed;
+    if(keys['s']||keys['S']) padL.y += padL.speed;
     if(keys['ArrowUp']) padR.y -= padR.speed;
     if(keys['ArrowDown']) padR.y += padR.speed;
 
-    // Touch movement
-    if(touchY.left !== null){
-      const target = touchY.left - padL.h/2;
-      padL.y = lerp(padL.y, target, 0.15);
-    }
-    if(touchY.right !== null){
-      const target = touchY.right - padR.h/2;
-      padR.y = lerp(padR.y, target, 0.15);
-    }
+    if(touchY.left !== null) padL.y = lerp(padL.y, touchY.left - padL.h/2, 0.18);
+    if(touchY.right !== null) padR.y = lerp(padR.y, touchY.right - padR.h/2, 0.18);
 
-    // Clamp paddles
     padL.y = clamp(padL.y, 0, H - padL.h);
     padR.y = clamp(padR.y, 0, H - padR.h);
 
-    // Ball movement — sub-step to prevent tunneling
-    const maxStep = ball.r * 0.8;  // never move more than ~radius per step
-    const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
-    const steps = Math.max(1, Math.ceil(speed / maxStep));
+    if(!roundActive) return;
 
-    for(let step = 0; step < steps; step++){
-      ball.x += ball.vx / steps;
-      ball.y += ball.vy / steps;
+    // ---- BALL PHYSICS (sub-stepped) ----
+    const totalDist = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy);
+    const stepSize = Math.max(1, ball.r * 0.5);
+    const steps = Math.max(1, Math.ceil(totalDist / stepSize));
+    const svx = ball.vx / steps;
+    const svy = ball.vy / steps;
 
-      // Top/bottom bounce
-      if(ball.y - ball.r <= 0){ ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
-      if(ball.y + ball.r >= H){ ball.y = H - ball.r; ball.vy = -Math.abs(ball.vy); }
+    for(let s = 0; s < steps; s++){
+      ball.x += svx;
+      ball.y += svy;
 
-      // Left paddle collision
-      if(ball.vx < 0 &&
-         ball.x - ball.r <= padL.x + padL.w &&
-         ball.x + ball.r >= padL.x &&
-         ball.y + ball.r >= padL.y &&
-         ball.y - ball.r <= padL.y + padL.h){
-        ball.x = padL.x + padL.w + ball.r;
-        const hitPos = clamp((ball.y - padL.y) / padL.h - 0.5, -0.5, 0.5);
-        const angle = hitPos * Math.PI * 0.6;
-        let newSpeed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
-        newSpeed = Math.min(newSpeed, W * BALL_MAX_SPEED_RATIO);  // cap speed
-        ball.vx = newSpeed * Math.cos(angle);
-        ball.vy = newSpeed * Math.sin(angle);
-        ballDir = 1;
-        updateBallLabel();
-        break;  // exit sub-stepping after collision
-      }
+      // Walls
+      if(ball.y - ball.r < 0){ ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
+      if(ball.y + ball.r > H){ ball.y = H - ball.r; ball.vy = -Math.abs(ball.vy); }
 
-      // Right paddle collision
-      if(ball.vx > 0 &&
-         ball.x + ball.r >= padR.x &&
-         ball.x - ball.r <= padR.x + padR.w &&
-         ball.y + ball.r >= padR.y &&
-         ball.y - ball.r <= padR.y + padR.h){
-        ball.x = padR.x - ball.r;
-        const hitPos = clamp((ball.y - padR.y) / padR.h - 0.5, -0.5, 0.5);
-        const angle = hitPos * Math.PI * 0.6;
-        let newSpeed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy) * BALL_SPEED_INC;
-        newSpeed = Math.min(newSpeed, W * BALL_MAX_SPEED_RATIO);  // cap speed
-        ball.vx = -newSpeed * Math.cos(angle);
-        ball.vy = newSpeed * Math.sin(angle);
-        ballDir = -1;
-        updateBallLabel();
-        break;  // exit sub-stepping after collision
-      }
+      // Paddles
+      if(collidePaddleLeft() || collidePaddleRight()) break;
 
-      // Score detection (only check once per frame, in outermost sub-step)
-      if(ball.x + ball.r < 0){ goalScored('provider'); return; }
-      if(ball.x - ball.r > W){ goalScored('payer'); return; }
+      // Goals
+      if(ball.x < -ball.r * 3){ goalScored('provider'); return; }
+      if(ball.x > W + ball.r * 3){ goalScored('payer'); return; }
     }
 
-    // Logo collectible collisions
+    // Logos & particles
     checkLogoCollisions();
     updateLogos();
     updateParticles();
 
-    // Banner alpha slowly fades to a resting level
     if(bannerAlpha > 0.5) bannerAlpha -= 0.008;
   }
 
@@ -646,132 +625,89 @@
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // ---- BIG BANNER at top ----
-    const bannerFontSize = Math.max(24, W * 0.055);
+    // Banner
     ctx.save();
-    ctx.font = `900 ${bannerFontSize}px Inter, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
+    ctx.font = `900 ${Math.max(24, W*0.055)}px Inter, sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     ctx.globalAlpha = bannerAlpha * 0.6;
     ctx.fillStyle = bannerColor;
-    ctx.shadowColor = bannerColor;
-    ctx.shadowBlur = 30;
-    ctx.fillText(bannerText, W/2, H * 0.06);
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
+    ctx.shadowColor = bannerColor; ctx.shadowBlur = 30;
+    ctx.fillText(bannerText, W/2, H*0.06);
     ctx.restore();
 
     // Center line
     ctx.setLineDash([8,8]);
-    ctx.strokeStyle = 'rgba(240,246,246,0.06)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(W/2, 0);
-    ctx.lineTo(W/2, H);
-    ctx.stroke();
+    ctx.strokeStyle = 'rgba(240,246,246,0.06)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
     ctx.setLineDash([]);
 
-    // ---- LOGO COLLECTIBLES ----
+    // Logo collectibles
     if(logoImg.complete){
-      for(const logo of logos){
+      for(const L of logos){
         ctx.save();
-        const pulse = 1 + 0.05 * Math.sin(Date.now() * 0.004 + logo.pulsePhase);
-        ctx.globalAlpha = logo.alpha * 0.8;
+        const pulse = 1 + 0.05*Math.sin(Date.now()*0.004 + L.pulsePhase);
+        ctx.globalAlpha = L.alpha * 0.8;
         ctx.filter = 'brightness(0) invert(1)';
-        ctx.shadowColor = 'rgba(0,212,170,0.5)';
-        ctx.shadowBlur = 15;
-        const drawW = logo.w * pulse;
-        const drawH = logo.h * pulse;
-        const drawX = logo.x + (logo.w - drawW) / 2;
-        const drawY = logo.y + (logo.h - drawH) / 2;
-        ctx.drawImage(logoImg, drawX, drawY, drawW, drawH);
-        ctx.filter = 'none';
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
+        ctx.shadowColor = 'rgba(0,212,170,0.5)'; ctx.shadowBlur = 15;
+        const dw = L.w*pulse, dh = L.h*pulse;
+        ctx.drawImage(logoImg, L.x+(L.w-dw)/2, L.y+(L.h-dh)/2, dw, dh);
         ctx.restore();
       }
     }
 
-    // ---- COLLECT PARTICLES ----
+    // Particles
     for(const p of collectParticles){
       ctx.save();
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle = p.color;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color; ctx.shadowBlur = 6;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
       ctx.restore();
     }
 
-    // ---- PADDLES ----
-    if(padL){
-      const padGlowL = 10 + padLGrowth * 80;
-      ctx.shadowColor = 'rgba(255,107,122,0.5)';
-      ctx.shadowBlur = padGlowL;
-      ctx.fillStyle = padLGrowth > 0.02 ? '#ff6b7a' : 'rgba(255,107,122,0.8)';
-      ctx.beginPath();
-      ctx.roundRect(padL.x, padL.y, padL.w, padL.h, 4);
-      ctx.fill();
-
-      if(padLGrowth > 0 && logoImg.complete){
-        ctx.shadowBlur = 0;
-        const lw = padL.w * 3;
-        const lh = lw * 0.26;
-        ctx.globalAlpha = Math.min(0.7, padLGrowth * 10);
-        ctx.filter = 'brightness(0) invert(1)';
-        ctx.drawImage(logoImg, padL.x - lw/2 + padL.w/2, padL.y + padL.h + 6, lw, lh);
-        ctx.filter = 'none';
-        ctx.globalAlpha = 1;
-      }
+    // Left paddle
+    ctx.shadowColor = 'rgba(255,107,122,0.5)';
+    ctx.shadowBlur = 10 + padLGrowth*80;
+    ctx.fillStyle = padLGrowth > 0.02 ? '#ff6b7a' : 'rgba(255,107,122,0.8)';
+    ctx.beginPath(); ctx.roundRect(padL.x, padL.y, padL.w, padL.h, 4); ctx.fill();
+    if(padLGrowth > 0 && logoImg.complete){
+      ctx.shadowBlur = 0;
+      const lw = padL.w*3, lh = lw*0.26;
+      ctx.globalAlpha = Math.min(0.7, padLGrowth*10);
+      ctx.filter = 'brightness(0) invert(1)';
+      ctx.drawImage(logoImg, padL.x - lw/2 + padL.w/2, padL.y + padL.h + 6, lw, lh);
+      ctx.filter = 'none'; ctx.globalAlpha = 1;
     }
 
-    if(padR){
-      const padGlowR = 10 + padRGrowth * 80;
-      ctx.shadowColor = 'rgba(0,212,170,0.5)';
-      ctx.shadowBlur = padGlowR;
-      ctx.fillStyle = padRGrowth > 0.02 ? '#00d4aa' : 'rgba(0,212,170,0.8)';
-      ctx.beginPath();
-      ctx.roundRect(padR.x, padR.y, padR.w, padR.h, 4);
-      ctx.fill();
-
-      if(padRGrowth > 0 && logoImg.complete){
-        ctx.shadowBlur = 0;
-        const lw = padR.w * 3;
-        const lh = lw * 0.26;
-        ctx.globalAlpha = Math.min(0.7, padRGrowth * 10);
-        ctx.filter = 'brightness(0) invert(1)';
-        ctx.drawImage(logoImg, padR.x - lw/2 + padR.w/2, padR.y + padR.h + 6, lw, lh);
-        ctx.filter = 'none';
-        ctx.globalAlpha = 1;
-      }
+    // Right paddle
+    ctx.shadowColor = 'rgba(0,212,170,0.5)';
+    ctx.shadowBlur = 10 + padRGrowth*80;
+    ctx.fillStyle = padRGrowth > 0.02 ? '#00d4aa' : 'rgba(0,212,170,0.8)';
+    ctx.beginPath(); ctx.roundRect(padR.x, padR.y, padR.w, padR.h, 4); ctx.fill();
+    if(padRGrowth > 0 && logoImg.complete){
+      ctx.shadowBlur = 0;
+      const lw = padR.w*3, lh = lw*0.26;
+      ctx.globalAlpha = Math.min(0.7, padRGrowth*10);
+      ctx.filter = 'brightness(0) invert(1)';
+      ctx.drawImage(logoImg, padR.x - lw/2 + padR.w/2, padR.y + padR.h + 6, lw, lh);
+      ctx.filter = 'none'; ctx.globalAlpha = 1;
     }
 
     ctx.shadowBlur = 0;
 
-    // ---- BALL ----
-    if(ball){
-      const isDenial = ball.vx > 0;
-      const ballColor = isDenial ? '#ff4757' : '#00d4aa';
-      const ballGlow = isDenial ? 'rgba(255,71,87,0.4)' : 'rgba(0,212,170,0.4)';
-
-      ctx.shadowColor = ballGlow;
+    // Ball (only draw if on screen)
+    if(ball.x > -100 && ball.x < W + 100){
+      const isDenial = ball.vx >= 0;
+      ctx.shadowColor = isDenial ? 'rgba(255,71,87,0.4)' : 'rgba(0,212,170,0.4)';
       ctx.shadowBlur = 20;
-      ctx.fillStyle = ballColor;
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
-      ctx.fill();
+      ctx.fillStyle = isDenial ? '#ff4757' : '#00d4aa';
+      ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Ball label
       ctx.font = `700 ${Math.max(9, W*0.009)}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.fillStyle = isDenial ? 'rgba(255,71,87,0.9)' : 'rgba(0,212,170,0.9)';
       ctx.fillText(ballLabel, ball.x, ball.y - ball.r - 8);
 
-      // Payer name
       ctx.font = `600 ${Math.max(7, W*0.007)}px Inter, sans-serif`;
       ctx.fillStyle = 'rgba(240,246,246,0.5)';
       ctx.fillText(ballPayer, ball.x, ball.y - ball.r - 8 - Math.max(11, W*0.011));
@@ -779,32 +715,25 @@
 
     // Side labels
     ctx.font = `800 ${Math.max(10, W*0.012)}px Inter, sans-serif`;
-    ctx.globalAlpha = 0.06;
-    ctx.fillStyle = '#ff6b7a';
-    ctx.textAlign = 'center';
-    ctx.fillText('PAYER', W*0.25, H/2);
-    ctx.fillStyle = '#00d4aa';
-    ctx.fillText('PROVIDER', W*0.75, H/2);
+    ctx.globalAlpha = 0.06; ctx.textAlign = 'center';
+    ctx.fillStyle = '#ff6b7a'; ctx.fillText('PAYER', W*0.25, H/2);
+    ctx.fillStyle = '#00d4aa'; ctx.fillText('PROVIDER', W*0.75, H/2);
     ctx.globalAlpha = 1;
   }
 
-  // ---- GAME LOOP ----
+  // ---- LOOP ----
   function loop(){
     if(!running) return;
-    update();
-    draw();
+    update(); draw();
     animId = requestAnimationFrame(loop);
   }
 
-  // ---- START/END ----
+  // ---- START / END ----
   function startGame(){
     scorePayer = 0; scoreProvider = 0;
     padLGrowth = 0; padRGrowth = 0;
-    logos = [];
-    collectParticles = [];
-    paused = false;
+    logos = []; collectParticles = [];
     clearTimeout(logoSpawnTimer);
-    clearTimeout(serveTimer);
     updateScoreUI();
     showScreen(gameScreen);
     resize();
@@ -816,22 +745,17 @@
 
   function endGame(){
     running = false;
-    paused = true;
+    roundActive = false;
     cancelAnimationFrame(animId);
     clearTimeout(logoSpawnTimer);
-    clearTimeout(serveTimer);
-    logos = [];
-    collectParticles = [];
-    ball = null;
+    logos = []; collectParticles = [];
 
     const winner = scorePayer >= WIN_SCORE ? 'payer' : 'provider';
-    const title = document.getElementById('res-title');
-    title.textContent = winner === 'payer' ? 'Payer Wins!' : 'Provider Wins!';
-    title.className = 'results-title ' + (winner === 'payer' ? 'payer-wins' : 'provider-wins');
+    const t = document.getElementById('res-title');
+    t.textContent = winner === 'payer' ? 'Payer Wins!' : 'Provider Wins!';
+    t.className = 'results-title ' + (winner==='payer'?'payer-wins':'provider-wins');
     document.getElementById('res-sub').textContent =
-      winner === 'provider'
-        ? 'Denials fought off. Revenue secured.'
-        : 'The denials keep coming. Time to automate?';
+      winner==='provider' ? 'Denials fought off. Revenue secured.' : 'The denials keep coming. Time to automate?';
     document.getElementById('res-score-payer').textContent = scorePayer;
     document.getElementById('res-score-provider').textContent = scoreProvider;
 
@@ -846,34 +770,24 @@
   playAgainBtn.addEventListener('click', startGame);
 
   // ---- GOOGLE SHEET ----
-  function submitToSheet(email){
-    if(!SHEET_WEBHOOK_URL) return;
-    fetch(SHEET_WEBHOOK_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        email: email,
-        game: 'Claim Pong',
-        survived: scorePayer + ' - ' + scoreProvider,
-        caught: scorePayer >= WIN_SCORE ? 'Payer' : 'Provider',
-        agentCaught: 0,
-        missed: 0,
-        revenueSaved: 0,
-        revenueLost: 0,
-        agents: ['pong']
-      })
-    }).catch(err => console.warn('Sheet error:', err));
-  }
-
   emailBtn.addEventListener('click', () => {
     const email = emailInput.value.trim();
     if(email && email.includes('@')){
       leadForm.classList.add('hidden');
       thankYou.classList.remove('hidden');
-      submitToSheet(email);
+      fetch(SHEET_WEBHOOK_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          email, game:'Claim Pong',
+          survived: scorePayer+' - '+scoreProvider,
+          caught: scorePayer>=WIN_SCORE?'Payer':'Provider',
+          agentCaught:0, missed:0, revenueSaved:0, revenueLost:0, agents:['pong']
+        })
+      }).catch(e=>console.warn('Sheet:',e));
     } else {
       emailInput.style.borderColor = 'var(--red)';
-      setTimeout(() => emailInput.style.borderColor = '', 1000);
+      setTimeout(()=> emailInput.style.borderColor = '', 1000);
     }
   });
   emailInput.addEventListener('keydown', e => { if(e.key==='Enter') emailBtn.click(); });
